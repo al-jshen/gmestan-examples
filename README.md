@@ -1,22 +1,23 @@
 # gmestan
 
-This repository provides examples for using Stan to create a multilevel model to estimate the mass of the Milky Way using kinematic data from tracers.
+This repository provides examples for using Stan to create a hierarchical Bayesian model to estimate the mass of the Milky Way using kinematic data from tracers.
 
-Two datasets are provided:
+## GME model
+
+This repository contains a Stan port of [GME](https://github.com/gweneadie/GME). There are two models, [`models/gc.stan`](models/gc.stan) and [`models/dg.stan`](models/dg.stan), which can be used to reproduce the results of [Eadie and Jurić 2019](https://ui.adsabs.harvard.edu/abs/2019ApJ...875..159E/abstract) and Slizewski et. al (submitted to ApJ) respectively. These models assume independence between the two proper motions (RA and DEC), do not incorporate covariances between phase-space parameters, and the results are produced with complete data only.
+
+Two accompanying datasets are provided:
 
 - [`GC_Vasiliev.csv`](data/GC_Vasiliev.csv): a globular cluster dataset from [Vasiliev 2019](https://ui.adsabs.harvard.edu/abs/2019MNRAS.484.2832V/abstract)
 - [`DG_Fritz.csv`](data/DG_Fritz.csv): a dwarf galaxy dataset from [Fritz 2018](https://ui.adsabs.harvard.edu/abs/2018A%26A...619A.103F/abstract)
 
-The Stan code is in [`models`](models). There are several models available, with each variant have two separate files to deal with the GC dataset and the DG dataset. In order from the simplest to the most complex:
+## Extended model
 
-- Two models which do not incorporate measurement uncertainties are given in [`gc_nouncertainty.stan`](models/gc_nouncertainty.stan) and [`dg_nouncertainty.stan`](models/dg_nouncertainty.stan).
-- The models matching [GME](https://github.com/gweneadie/GME), used to reproduce the results of [Eadie and Jurić 2019](https://ui.adsabs.harvard.edu/abs/2019ApJ...875..159E/abstract) and Slizewski et. al in prep, are in [`gc.stan`](models/gc.stan) and [`dg.stan`](models/dg.stan) respectively. These models assume independence between the two proper motions (RA and DEC), and the results are produced with complete data only.
-- Two models which incorporate covariance matrices for the proper motions are given in [`gc_covmat.stan`](models/gc_covmat.stan) and [`dg_covmat.stan`](models/dg_covmat.stan). This reduces down to the previous model if the correlations given are zero.
-- Two models which deal with missing data (where there are no proper motions and/or line-of-sight velocities available) and incorporate covariance matrices for the available proper motions are given in [`gc_covmat_incomplete.stan`](models/gc_covmat_incomplete.stan) and [`dg_covmat_incomplete.stan`](models/dg_covmat_incomplete.stan). This reduces down to the previous model if all objects have complete data.
+The extended model used for analysis of H3 halo stars is provided in [`models/h3.stan`](models/h3.stan). Bring your own data!
 
 ## Python
 
-To install [PyStan](https://github.com/stan-dev/pystan) (the Python interface to Stan), see the instructions [here](https://github.com/stan-dev/pystan/blob/develop/doc/installation_beginner.rst).
+To install [CmdStanPy](https://github.com/stan-dev/cmdstanpy) (a lightweight Python interface to Stan), see the instructions [here](https://cmdstanpy.readthedocs.io/en/v0.9.76/installation.html).
 
 The Python file, [`examples/gme_py.ipynb`](examples/gme_py.ipynb), is a Jupyter notebook. Apart from Pystan and Jupyter, the necessary dependencies to run all the code in the notebook can be installed through `pip` with the following line:
 

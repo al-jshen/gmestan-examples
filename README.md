@@ -13,7 +13,7 @@ Two accompanying datasets are provided:
 
 ## Extended model
 
-The extended model used for analysis of H3 halo stars is provided in [`models/h3.stan`](models/h3.stan). Bring your own data!
+The extended model used for analysis of H3 halo stars is provided in [`models/h3p.stan`](models/h3p.stan). Bring your own data!
 
 ## Python
 

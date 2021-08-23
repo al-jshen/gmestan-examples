@@ -89,7 +89,7 @@ initfun = function() {
     )
 }
 
-#Given a Stan file, compile the model and run it, passing in at the minimum the data to use. Here we also specify the number of chains (where each chain is run on a separate thread), the initial values, and some additional parameters controlling the algorithm. 
+# Given a Stan file, compile the model and run it, passing in at the minimum the data to use. Here we also specify the number of chains (where each chain is run on a separate thread), the initial values, and some additional parameters controlling the algorithm. 
 
 #`adapt_delta` effectively controls the step size of the numerical integrator. Run the code with lower values (default is 0.8) first, and if the number of divergences is significant enough to impact the validity of the samples then increase this value. This increases the model robustness but may lead to slower sampling. Do not increase this if you only have a few divergences out of a few thousand draws, or if your `n_eff` is already reasonably large.
 
@@ -97,7 +97,7 @@ initfun = function() {
 
 #`chains` controls the number of Markov chains to use. The default is 4. Each chain runs on a separate core, and you can set the number of chains to as many cores as you have. However, since `n_eff` of a few hundred is usually enough for inference, more chains are not always necessary. Increasing the number of chains may also increase the runtime. Use `chains=1` for diagnostic purposes. 
 
-#`warmup` controls the number of iterations to perform in the warmup stage. This helps NUTS find the optimal number of steps and the step size, and the samples drawn here are not used for inference purposes. `iter` controls the total number of iterations to perform. The number of actual usable draws will be `iter - warmup`.  
+#`iter_warmup` controls the number of iterations to perform in the warmup stage. This helps NUTS find the optimal number of steps and the step size, and the samples drawn here are not used for inference purposes. `iter_sampling` controls the total number of iterations to perform. The number of actual usable draws will be `iter - warmup`.  
 
 mod = cmdstan_model("../models/gc.stan")
 
@@ -105,6 +105,8 @@ fit = mod$sample(
     data = stan_data,
     chains = 2,
     init = initfun,
+    iter_warmup = 1000,
+    iter_sampling = 1000,
     # output_dir = '../saved/'
     # max_treedepth = 13,
     # adapt_delta = 0.95,
@@ -148,13 +150,16 @@ mcmc_pairs(posterior, pars = params, np = np, off_diag_fun = 'hex')
 mcmc_trace(posterior, pars = params)
 
 # ridgeline plot of distances, proper motions, los velocities
-select(samples, contains("r[")) %>% melt %>% ggplot() + geom_density_ridges(aes(x=value, y=variable))
-select(samples, contains("pmra[")) %>% melt %>% ggplot() + geom_density_ridges(aes(x=value, y=variable))
-select(samples, contains("pmdec[")) %>% melt %>% ggplot() + geom_density_ridges(aes(x=value, y=variable))
-select(samples, contains("vlos[")) %>% melt %>% ggplot() + geom_density_ridges(aes(x=value, y=variable))
+plot_posterior_ridgelines = function(samples, varname) {
+    select(samples, contains(paste(varname, "[", sep = ""))) %>% melt %>% ggplot() + geom_density_ridges(aes(x=value, y=variable), quantile_lines = TRUE, quantiles = 2) 
+}
+plot_posterior_ridgelines(samples, "pmra")
+plot_posterior_ridgelines(samples, "pmdec")
+plot_posterior_ridgelines(samples, "r")
+plot_posterior_ridgelines(samples, "vlos")
+
 
 # Define a function which, given the radius in kpc, returns either a large number of mass estimates at that radius, or some summary statistics for the mass at that radius. The resulting mass is in units of $10^{12}$ M$_\odot$.
-
 mass_at_radius = function(r, data, full=FALSE) {
     m = data$p_gamma * data$p_phi0 * 2.325e-3 * (r)^(1 - data$p_gamma) * 1e12
     if (full) {
@@ -165,7 +170,6 @@ mass_at_radius = function(r, data, full=FALSE) {
 }
 
 # Plot the mass distribution out to some radius, along with various credible intervals.
-
 plot_masses = function(massfunc, data, add=FALSE, color="blue", upto=200) {
     radii = seq(1, upto, length.out = 1000)
     masses = sapply(radii, massfunc, data = data) / 1e12
@@ -181,12 +185,10 @@ plot_masses = function(massfunc, data, add=FALSE, color="blue", upto=200) {
 }
 
 # Plot the mass distribution out to 300 kpc.
-
 plot_masses(mass_at_radius, samples, color='#5E81AC', upto=300)
 
 
 # Plot the density of the mass within 200 kpc.
-
 mass_at_radius(200, samples, full=TRUE) %>% 
     data.frame %>% 
     rename(mass='.') %>% 

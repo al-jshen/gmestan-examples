@@ -2,4 +2,6 @@
 saved
 models/gc
 models/dg
+models/h3p
 *.hpp
+h3.csv

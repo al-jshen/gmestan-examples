@@ -25,7 +25,7 @@ To install [CmdStanPy](https://github.com/stan-dev/cmdstanpy) (a lightweight Pyt
 
 The Python examples are Jupyter notebooks. Apart from Pystan and Jupyter, the necessary dependencies to run all the code in the notebook can be installed through `pip` with the following line:
 
-```
+```bash
 pip3 install numpy pandas matplotlib arviz seaborn
 ```
 
@@ -35,7 +35,7 @@ To install [CmdStanR](https://github.com/stan-dev/cmdstanr) (the R interface to 
 
 I recommend opening the provided R files in [RStudio](https://rstudio.com/products/rstudio/). Apart from CmdStanR, the necessary depenencies to run all the code can be installed with the following line:
 
-```
+```r
 install.packages(c("tidyverse", "latex2exp", "bayesplot", "shinystan", "ggridges", "reshape2", "posterior"), dependencies=TRUE)
 ```
 

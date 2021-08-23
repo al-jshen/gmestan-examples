@@ -6,7 +6,7 @@ This repository provides examples for using Stan to create a hierarchical Bayesi
 
 This repository contains a Stan port of [GME](https://github.com/gweneadie/GME). There are two models, [`models/gc.stan`](models/gc.stan) and [`models/dg.stan`](models/dg.stan), which can be used to reproduce the results of [Eadie and Jurić 2019](https://ui.adsabs.harvard.edu/abs/2019ApJ...875..159E/abstract) and Slizewski et. al (submitted to ApJ) respectively. These models assume independence between the two proper motions (RA and DEC), do not incorporate covariances between phase-space parameters, and the results are produced with complete data only.
 
-Example files for how to use the models are in [`examples/gme.ipynb`](examples/gme.ipynb) for Python and [`examples/gme.r`](examples/gme.r) for R. 
+Example files for how to use the models are in [`examples/gme_py.ipynb`](examples/gme_py.ipynb) for Python and [`examples/gme.r`](examples/gme.r) for R. 
 
 Two accompanying datasets are provided:
 

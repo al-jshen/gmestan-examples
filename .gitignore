@@ -1,4 +1,6 @@
 .ipynb_checkpoints
+.virtual_documents
+.Rhistory
 saved
 models/gc
 models/dg

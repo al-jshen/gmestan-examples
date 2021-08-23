@@ -3,6 +3,7 @@ library(tidyverse)
 
 options(mc.cores = parallel::detectCores())
 
+# YOUR DATA HERE!
 d = read.csv('../data/h3.csv')
 
 d = d %>% 

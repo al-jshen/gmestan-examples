@@ -1,14 +1,14 @@
-library(rstan)
-library(ggplot2)
-library(dplyr)
+library(cmdstanr)
+library(tidyverse)
 library(latex2exp)
+library(posterior)
 library(bayesplot)
-library(shinystan)
+library(reshape2)
+library(ggridges)
 
 # Detect the number of usable cores. Also make sure that Stan reuses models that have not changed so that we don't have to recompile every time.
 
 options(mc.cores = parallel::detectCores())
-rstan_options(auto_write = TRUE)
 
 # Define a function to read in the appropriate data set and do some preprocessing.
 
@@ -63,7 +63,7 @@ stan_data = list(
     pmra_err = d$ePMra,
     pmdec_err = d$ePMdec,
     vlos_err = d$eVlos,
-    r_err = d$eRgc,
+    r_err = d$eRgc
 )
 
 # Define a function which generates a dictionary with the initial values. Initial values must be specified for either all parameters xor none of the parameters. The type for each parameter must match what is defined in the Stan model.
@@ -99,6 +99,17 @@ initfun = function() {
 
 #`warmup` controls the number of iterations to perform in the warmup stage. This helps NUTS find the optimal number of steps and the step size, and the samples drawn here are not used for inference purposes. `iter` controls the total number of iterations to perform. The number of actual usable draws will be `iter - warmup`.  
 
+mod = cmdstan_model("../models/gc.stan")
+
+fit = mod$sample(
+    data = stan_data,
+    chains = 2,
+    init = initfun,
+    # output_dir = '../saved/'
+    # max_treedepth = 13,
+    # adapt_delta = 0.95,
+)
+
 fit = stan(file = "../models/gc.stan", # or use another model (.stan file) in the same directory
            data=stan_data,
            # warmup=4e3,
@@ -113,60 +124,39 @@ fit = stan(file = "../models/gc.stan", # or use another model (.stan file) in th
            verbose = TRUE
 )
 
-# Stan shows some useful information about the fitted model.
-
-print(fit)
+# Run diagnostics.
+fit$cmdstan_diagnose()
 
 # Draw samples from the posterior. 
-la = extract(fit) %>% data.frame
-
-# Launch an interactive Shiny app to explore the model. 
-# launch_shinystan(fit)
+samples = fit$draws() %>% as_draws_df
+posterior = fit$draws() %>% as.array
+np = nuts_params(fit)
 
 # Here are the parameters of most interest. 
+params = c("p_phi0", "p_gamma", "p_alpha", "p_beta")
 
-params=c("p_phi0", "p_gamma", "p_alpha", "p_beta")
+# Make some plots of the posterior samples.
+mcmc_dens_overlay(posterior, pars = params)
 
-# Here is a function to show the posteriors. 
+# Parallel plot. Check where divergences occur. 
+mcmc_parcoord(posterior, pars = params, transformations = scale, np = np)
 
-show_posteriors = function(sep_chains=TRUE) {
-    cat("enter:\t show more\nq+enter: break")
-    
-    print(stan_dens(fit, pars=params, separate_chains = sep_chains))
-    keypress = readline()
-    if (keypress == 'q') {
-        break;
-    }
-    
-    for (i in 1:stan_data$N) {
-        pars = c(
-            paste("pmra[", i, "]"),
-            paste("pmdec[", i, "]"),
-            paste("vlos[", i, "]"),
-            paste("r[", i, "]")
-        )
-        print(stan_dens(fit, pars=pars, separate_chains = sep_chains))
-        keypress = readline()
-        if (keypress == 'q') {
-            break;
-        }
-    }
-}
-
-show_posteriors(sep_chains=TRUE)
-
-# Show a pairs plot of the parameters of interest. 
-pairs(fit, pars = params)
-# mcmc_pairs(fit, pars=params, diag_fun = 'dens', off_diag_fun = 'hex')
+# Pairs plot
+mcmc_pairs(posterior, pars = params, np = np, off_diag_fun = 'hex')
 
 # Show a traceplot of the chains.  These are like usual traceplots, and should look like Gaussian noise with a stable means and (non-zero) variances.
+mcmc_trace(posterior, pars = params)
 
-traceplot(fit, pars=params)
+# ridgeline plot of distances, proper motions, los velocities
+select(samples, contains("r[")) %>% melt %>% ggplot() + geom_density_ridges(aes(x=value, y=variable))
+select(samples, contains("pmra[")) %>% melt %>% ggplot() + geom_density_ridges(aes(x=value, y=variable))
+select(samples, contains("pmdec[")) %>% melt %>% ggplot() + geom_density_ridges(aes(x=value, y=variable))
+select(samples, contains("vlos[")) %>% melt %>% ggplot() + geom_density_ridges(aes(x=value, y=variable))
 
 # Define a function which, given the radius in kpc, returns either a large number of mass estimates at that radius, or some summary statistics for the mass at that radius. The resulting mass is in units of $10^{12}$ M$_\odot$.
 
-mass_at_radius = function(r, full=FALSE) {
-    m = la$p_gamma * la$p_phi0 * 2.325e-3 * (r)^(1 - la$p_gamma) * 1e12
+mass_at_radius = function(r, data, full=FALSE) {
+    m = data$p_gamma * data$p_phi0 * 2.325e-3 * (r)^(1 - data$p_gamma) * 1e12
     if (full) {
         return(m)
     } else {
@@ -176,14 +166,14 @@ mass_at_radius = function(r, full=FALSE) {
 
 # Plot the mass distribution out to some radius, along with various credible intervals.
 
-plot_masses = function(massfunc, add=FALSE, color="blue", upto=200) {
+plot_masses = function(massfunc, data, add=FALSE, color="blue", upto=200) {
     radii = seq(1, upto, length.out = 1000)
-    masses = sapply(radii, massfunc) / 1e12
+    masses = sapply(radii, massfunc, data = data) / 1e12
     par(mfrow=c(1,1))
     if (add) {
         lines(radii, masses['50%',], type='l', ylab=TeX("Mass ($10^{12} M_{sol}$)"), xlab="Radius (kpc)")
     } else {
-        plot(radii, masses['50%',], type='l', ylab=TeX("Mass ($10^{12} M_{sol}$)$"), xlab="Radius (kpc)", ylim=c(0, 2.5))
+        plot(radii, masses['50%',], type='l', ylab=TeX("Mass ($10^{12} M_{sol}$)$"), xlab="Radius (kpc)", ylim=c(0, 1.5))
     }
     polygon(c(radii, rev(radii)), c(masses['25%',], rev(masses['75%',])), col=adjustcolor(color,alpha.f=0.4) , fillOddEven = TRUE)
     polygon(c(radii, rev(radii)), c(masses['12.5%',], rev(masses['87.5%',])), col=adjustcolor(color,alpha.f=0.3) , fillOddEven = TRUE)
@@ -192,27 +182,15 @@ plot_masses = function(massfunc, add=FALSE, color="blue", upto=200) {
 
 # Plot the mass distribution out to 300 kpc.
 
-plot_masses(mass_at_radius, color='#5E81AC', upto=300)
+plot_masses(mass_at_radius, samples, color='#5E81AC', upto=300)
 
 
 # Plot the density of the mass within 200 kpc.
 
-mass_at_radius(200, full=TRUE) %>% 
+mass_at_radius(200, samples, full=TRUE) %>% 
     data.frame %>% 
     rename(mass='.') %>% 
     ggplot(aes(x=mass)) + 
     geom_density(col='#5E81AC', size=1) +
-    geom_vline(xintercept=mass_at_radius(200)['50%'], col='#5E81AC', size=1) +
+    geom_vline(xintercept=mass_at_radius(200, samples)['50%'], col='#5E81AC', size=1) +
     xlim(5e11, 2e12)
-
-
-
-# Optionally save the model. 
-fname = "../saved/2020-11-25-complete_dg_unc_covmat"
-save.image(paste(fname, '.RData', sep=""))
-
-# Export the posterior draws to a csv file
-rio::export(la, paste(fname, "_samples.csv", sep=""), format='csv')
-
-# Load in a saved model
-load('../saved/2020-11-02-complete_gc_vasiliev_unc.RData')

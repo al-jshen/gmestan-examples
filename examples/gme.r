@@ -21,7 +21,7 @@ import_data = function(dataset) {
         # formatting GC names
         d$Fullname = d$Fullname %>% trimws
     }
-    
+
     # for dwarf galaxy data set
     else if (dataset == 'dg') {
         # ignore these DGs, they are possibly associated with the LMC

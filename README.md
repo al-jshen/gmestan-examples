@@ -15,7 +15,7 @@ Two accompanying datasets are provided:
 
 ## Extended model
 
-The extended model used for analysis of H3 halo stars is provided in [`models/h3p.stan`](models/h3p.stan). The model is currently written assuming complete data, but is already set up so that it can be easily modified to use incomplete data. 
+The extended model used for analysis of H3 halo stars is provided in [`models/h3p.stan`](models/h3p.stan). The model can deal with missing positions and/or velocities, and incorporates within-source covariances.
 
 There are again two examples, [`examples/h3.ipynb`](examples/h3.ipynb) and [`examples/h3.r`](examples/h3.r). Bring your own data!
 

@@ -71,8 +71,6 @@ standata = list(
     ra_pmdec_corr = d$GAIAEDR3_RA_PMDEC_CORR,
     dec_pmra_corr = d$GAIAEDR3_DEC_PMRA_CORR,
     
-    grainsize = 1,
-    
     # try different priors!
     alpha_mean = 4.,
     alpha_sigma = 0.1,

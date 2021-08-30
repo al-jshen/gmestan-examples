@@ -85,7 +85,6 @@ functions {
 
         return rtp / 100; // in units of 100km/s
     }
-
 }
 
 data {

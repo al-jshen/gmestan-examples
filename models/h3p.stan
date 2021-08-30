@@ -40,8 +40,6 @@ data {
     vector[N] ra_pmdec_corr;
     vector[N] dec_pmra_corr;
 
-    int<lower=1> grainsize;
-
     real alpha_mean;
     real alpha_sigma;
     real beta_mean;
@@ -50,6 +48,8 @@ data {
 }
 
 transformed data {
+
+    int<lower=1> grainsize;
 
     row_vector[2] pg_mean = [64.6317304 ,  0.44004421];
     cholesky_factor_cov[2] pg_sigma = cholesky_decompose([
@@ -232,17 +232,37 @@ model {
         alpha_std ~ std_normal();
     }
 
-   profile("observation") {
+    // observation process ----------------------
+    profile("observation") {
 
-        // using complete data here. modify this to use the appropriate 
-        // means and covariance matrices if missing data (already created above)
-
-        // observation process ----------------------
+        // full process with support for missing data
         for (i in 1:N) {
-            pos_pm_measured[i] ~ multi_normal_cholesky(pos_pm[1:4,i], pos_pm_cov_mats[i]);
+            if (pos_obs[i] && pm_obs[i]) {
+                pos_pm_measured[i] ~ multi_normal_cholesky(pos_pm[i], pos_pm_cov_mats[i]);
+            } else {
+                if (pos_obs[i]) {
+                    pos_measured[i] ~ multi_normal_cholesky(pos[i], pos_cov_mats[i]);
+                }
+                if (pm_obs[i]) {
+                    pm_measured[i] ~ multi_normal_cholesky(pm[i], pm_cov_mats[i]);
+                }
+            }
+            if (plx_obs[i]) {
+                plx_measured[i] ~ normal(plx[i], plx_err[i]);
+            }
+            if (vlos_obs[i]) {
+                vlos_measured[i] ~ normal(vlos[i], vlos_err[i]);
+            }
         }
-        dist_std ~ std_normal();
-        vlos_std ~ std_normal();
+
+
+        // using complete data here. uncomment this as necessary (might be a little faster).
+
+        /* for (i in 1:N) { */
+        /*     pos_pm_measured[i] ~ multi_normal_cholesky(pos_pm[1:4,i], pos_pm_cov_mats[i]); */
+        /* } */
+        /* dist_std ~ std_normal(); */
+        /* vlos_std ~ std_normal(); */
     }
 
     // likelihood ---------------------
@@ -261,10 +281,3 @@ model {
         /* target += reduce_sum(partial_df_vec_lupdf, dummy, grainsize, y, p_phi0, p_gamma, p_alpha, p_beta); */
     }
 }
-
-generated quantities {
-    // check that transformations are correct
-    matrix[3, N] pos_gc_gen = transform_pos_vec(ra_measured * deg2rad, dec_measured * deg2rad, dist_measured, R, H);
-    matrix[3, N] vels_sph_gen = transform_vels_vec(ra_measured * deg2rad , dec_measured * deg2rad , dist_measured, pmra_measured, pmdec_measured, vlos_measured, R, H, offset, solarmotion);
-}
-

@@ -247,11 +247,11 @@ model {
                     pm_measured[i] ~ multi_normal_cholesky(pm[i], pm_cov_mats[i]);
                 }
             }
-            if (plx_obs[i]) {
-                plx_measured[i] ~ normal(plx[i], plx_err[i]);
+            if (dist_obs[i]) {
+                dist_std[i] ~ std_normal();
             }
             if (vlos_obs[i]) {
-                vlos_measured[i] ~ normal(vlos[i], vlos_err[i]);
+                vlos_std[i] ~ std_normal();
             }
         }
 

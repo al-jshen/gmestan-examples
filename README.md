@@ -19,6 +19,8 @@ The extended model used for analysis of H3 halo stars is provided in [`models/h3
 
 There are again two examples, [`examples/h3.ipynb`](examples/h3.ipynb) and [`examples/h3.r`](examples/h3.r). Bring your own data!
 
+Also provided is a version of the model where RA and Dec. are fixed. This model can be found in [`models/h3p-fixed.stan`](models/h3p-fixed.stan).
+
 ## Python
 
 To install [CmdStanPy](https://github.com/stan-dev/cmdstanpy) (a lightweight Python interface to Stan), see the instructions [here](https://cmdstanpy.readthedocs.io/en/v0.9.76/installation.html).

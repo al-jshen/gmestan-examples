@@ -1,6 +1,6 @@
 # gmestan
 
-This repository provides examples for using Stan to create a hierarchical Bayesian model to estimate the mass of the Milky Way using kinematic data from tracers.
+This repository provides examples for using Stan to create a hierarchical Bayesian model to estimate the mass of the Milky Way using kinematic data from tracers. See the associated paper describing the model and code here: [Shen et al. 2021](https://arxiv.org/abs/2111.09327)
 
 ## GME model
 
@@ -39,6 +39,20 @@ I recommend opening the provided R files in [RStudio](https://rstudio.com/produc
 
 ```r
 install.packages(c("tidyverse", "latex2exp", "bayesplot", "shinystan", "ggridges", "reshape2", "posterior"), dependencies=TRUE)
+```
+
+## Citation
+
+If you make use of the code in this repository and find it useful, please consider citing [Shen et al. 2021](https://arxiv.org/abs/2111.09327). The BibTeX entry for this paper is: 
+```bibtex
+@article{Shen_2021,
+  title={The Mass of the Milky Way from the H3 Survey},
+  author={Shen, Jeff and Eadie, Gwendolyn M. and Murray, Norman and Zaritsky, Dennis and Speagle, Joshua S. and Ting, Yuan-Sen and Conroy, Charlie and Cargile, Phillip A. and Johnson, Benjamin D. and Naidu, Rohan P. and Han, Jiwon Jesse},
+  year={2021},
+  eprint={2111.09327v1},
+  archivePrefix={arXiv},
+  primaryClass={astro-ph.GA}
+}
 ```
 
 ## Useful Resources

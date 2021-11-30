@@ -15,11 +15,10 @@ Two accompanying datasets are provided:
 
 ## Extended model
 
-The extended model used for analysis of H3 halo stars is provided in [`models/h3p.stan`](models/h3p.stan). The model can deal with missing positions and/or velocities, and incorporates within-source covariances.
+The extended model used for analysis of H3 halo stars is provided in [`models/h3p.stan`](models/h3p.stan). The model can deal with missing positions and/or velocities, and incorporates within-source covariances. 
+Also provided is a version of the model where RA and Dec. are fixed. This model can be found in [`models/h3p-fixed.stan`](models/h3p-fixed.stan), and is the recommended one to use when uncertainties in position are small (e.g., from Gaia). 
 
-There are again two examples, [`examples/h3.ipynb`](examples/h3.ipynb) and [`examples/h3.r`](examples/h3.r). Bring your own data!
-
-Also provided is a version of the model where RA and Dec. are fixed. This model can be found in [`models/h3p-fixed.stan`](models/h3p-fixed.stan). This model is recommended when uncertainties in position are small (e.g., from Gaia). 
+There are again two examples of how to run the models: [`examples/h3.ipynb`](examples/h3.ipynb) and [`examples/h3.r`](examples/h3.r). Bring your own data!
 
 ## Python
 

@@ -238,13 +238,13 @@ model {
         // full process with support for missing data
         for (i in 1:N) {
             if (pos_obs[i] && pm_obs[i]) {
-                pos_pm_measured[i] ~ multi_normal_cholesky(pos_pm[i], pos_pm_cov_mats[i]);
+                pos_pm_measured[i] ~ multi_normal_cholesky(pos_pm[1:4,i], pos_pm_cov_mats[i]);
             } else {
                 if (pos_obs[i]) {
-                    pos_measured[i] ~ multi_normal_cholesky(pos[i], pos_cov_mats[i]);
+                    pos_measured[i] ~ multi_normal_cholesky(pos_pm[1:2,i], pos_cov_mats[i]);
                 }
                 if (pm_obs[i]) {
-                    pm_measured[i] ~ multi_normal_cholesky(pm[i], pm_cov_mats[i]);
+                    pm_measured[i] ~ multi_normal_cholesky(pos_pm[3:4,i], pm_cov_mats[i]);
                 }
             }
             if (dist_obs[i]) {

@@ -242,14 +242,36 @@ model {
 
     // no explicit priors on "true" parameters because the DF is the prior
 
-   profile("observation") {
+    profile("observation") {
 
-        // observation process ----------------------
+        // full process with support for missing data
         for (i in 1:N) {
-            pos_pm_measured[i] ~ multi_normal_cholesky(pos_pm[1:4,i], pos_pm_cov_mats[i]);
+            if (pos_obs[i] && pm_obs[i]) {
+                pos_pm_measured[i] ~ multi_normal_cholesky(pos_pm[i], pos_pm_cov_mats[i]);
+            } else {
+                if (pos_obs[i]) {
+                    pos_measured[i] ~ multi_normal_cholesky(pos[i], pos_cov_mats[i]);
+                }
+                if (pm_obs[i]) {
+                    pm_measured[i] ~ multi_normal_cholesky(pm[i], pm_cov_mats[i]);
+                }
+            }
+            if (dist_obs[i]) {
+                dist_std[i] ~ std_normal();
+            }
+            if (vlos_obs[i]) {
+                vlos_std[i] ~ std_normal();
+            }
         }
-        dist_std ~ std_normal();
-        vlos_std ~ std_normal();
+
+        // using complete data here. uncomment this as necessary (might be a little faster).
+
+        /* for (i in 1:N) { */
+        /*     pos_pm_measured[i] ~ multi_normal_cholesky(pos_pm[1:4,i], pos_pm_cov_mats[i]); */
+        /* } */
+        /* dist_std ~ std_normal(); */
+        /* vlos_std ~ std_normal(); */
+
     }
 
     // likelihood ---------------------

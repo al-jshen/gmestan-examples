@@ -215,8 +215,8 @@ transformed parameters {
         row_vector[N] vt_sq = square(vels_sph[2]) + square(vels_sph[3]);
         y[2] = sqrt(vt_sq);
         y[1] = sqrt(square(vels_sph[1]) + vt_sq);
-        pos_gc = transform_pos_vec(ra_rad, dec_rad, dist, R, H);;
-        y[3] = sqrt(columns_dot_self(pos_gc));;
+        pos_gc = transform_pos_vec(ra_rad, dec_rad, dist, R, H);
+        y[3] = sqrt(columns_dot_self(pos_gc));
     }
 
 }

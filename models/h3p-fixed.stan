@@ -40,8 +40,6 @@ data {
     vector[N] ra_pmdec_corr;
     vector[N] dec_pmra_corr;
 
-    int<lower=1> grainsize;
-
     real alpha_mean;
     real alpha_sigma;
     real beta_mean;
@@ -50,6 +48,8 @@ data {
 }
 
 transformed data {
+
+    /* int grainsize = 1; */
 
     row_vector[2] pg_mean = [64.6317304 ,  0.44004421];
     cholesky_factor_cov[2] pg_sigma = cholesky_decompose([

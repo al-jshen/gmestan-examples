@@ -40,6 +40,8 @@ data {
     vector[N] ra_pmdec_corr;
     vector[N] dec_pmra_corr;
 
+    /* int<lower=1> grainsize; */
+
     real alpha_mean;
     real alpha_sigma;
     real beta_mean;
@@ -48,8 +50,6 @@ data {
 }
 
 transformed data {
-
-    /* int grainsize = 1; */
 
     row_vector[2] pg_mean = [64.6317304 ,  0.44004421];
     cholesky_factor_cov[2] pg_sigma = cholesky_decompose([
@@ -61,7 +61,6 @@ transformed data {
 
     row_vector[N] ra_rad = ra_measured * deg2rad;
     row_vector[N] dec_rad = dec_measured * deg2rad;
-
 
     // icrs to gctc matrices and vectors
     matrix[3, 3] R = [
@@ -199,8 +198,8 @@ transformed parameters {
 
     /* real<lower=0> p_phi0 = phi0_raw + 18.21597964588313; */
 
-    /* vector[2] pos[N]; */
-    /* vector[2] pm[N]; // mas/yr */
+    matrix[2, N] pos = [ra_measured, dec_measured]';
+    matrix[2, N] pm = [pmra, pmdec]';
     matrix[4, N] pos_pm = [ra_measured, dec_measured, pmra, pmdec]; // mas/yr for the pm part
 
     matrix[3, N] vels_sph;
@@ -233,44 +232,33 @@ model {
 
     profile("hyperpriors") {
         [p_phi0, p_gamma] ~ multi_normal_cholesky(pg_mean, pg_sigma);
-        /* phi0_raw ~ gamma(48.884347, 1./0.9755005176256963); */
-        /* p_beta ~ normal(beta_mean, beta_sigma); */
-        /* p_alpha ~ normal(alpha_mean, alpha_sigma); */
         beta_std ~ std_normal();
         alpha_std ~ std_normal();
     }
 
     // no explicit priors on "true" parameters because the DF is the prior
 
-    profile("observation") {
+   profile("observation") {
 
-        // full process with support for missing data
+        // observation process ----------------------
         for (i in 1:N) {
-            if (pos_obs[i] && pm_obs[i]) {
-                pos_pm_measured[i] ~ multi_normal_cholesky(pos_pm[1:4,i], pos_pm_cov_mats[i]);
-            } else {
-                if (pos_obs[i]) {
-                    pos_measured[i] ~ multi_normal_cholesky(pos_pm[1:2,i], pos_cov_mats[i]);
-                }
-                if (pm_obs[i]) {
-                    pm_measured[i] ~ multi_normal_cholesky(pos_pm[3:4,i], pm_cov_mats[i]);
-                }
-            }
-            if (dist_obs[i]) {
-                dist_std[i] ~ std_normal();
-            }
-            if (vlos_obs[i]) {
-                vlos_std[i] ~ std_normal();
-            }
+          if (pos_obs[i] && pm_obs[i]) {
+              pos_pm_measured[i] ~ multi_normal_cholesky(pos_pm[i], pos_pm_cov_mats[i]);
+          } else {
+              if (pos_obs[i]) {
+                  pos_measured[i] ~ multi_normal_cholesky(pos[i], pos_cov_mats[i]);
+              }
+              if (pm_obs[i]) {
+                  pm_measured[i] ~ multi_normal_cholesky(pm[i], pm_cov_mats[i]);
+              }
+          }
+          if (dist_obs[i]) {
+              dist_std[i] ~ std_normal();
+          }
+          if (vlos_obs[i]) {
+              vlos_std[i] ~ std_normal();
+          }
         }
-
-        // using complete data here. uncomment this as necessary (might be a little faster).
-
-        /* for (i in 1:N) { */
-        /*     pos_pm_measured[i] ~ multi_normal_cholesky(pos_pm[1:4,i], pos_pm_cov_mats[i]); */
-        /* } */
-        /* dist_std ~ std_normal(); */
-        /* vlos_std ~ std_normal(); */
 
     }
 

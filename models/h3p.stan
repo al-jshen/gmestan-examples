@@ -71,7 +71,7 @@ transformed data {
         [-0.002560945579906427, 0.0, 0.9999967207734917]
     ];
     matrix[3, 3] A = H * R;
-    vector[3] offset = to_vector([8.122, 0., 0.]);
+    vector[3] offsett = to_vector([8.122, 0., 0.]);
     vector[3] solarmotion = to_vector([12.9, 245.6, 7.78]);
 
     // array of N 2x2 covariance matrices
@@ -208,7 +208,7 @@ transformed parameters {
     matrix[3, N] pos_gc;
 
     profile("transform_vels") {
-        vels_sph = transform_vels_vec(ra_rad, dec_rad, dist, pmra, pmdec, vlos, R, H, offset, solarmotion) ./ 100.; // units of 100km/s
+        vels_sph = transform_vels_vec(ra_rad, dec_rad, dist, pmra, pmdec, vlos, R, H, offsett, solarmotion) ./ 100.; // units of 100km/s
     }
 
     profile("y and position transformation") {

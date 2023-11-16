@@ -544,8 +544,8 @@ transformed parameters {
   
   /* real<lower=0> p_phi0 = phi0_raw + 18.21597964588313; */
   
-  matrix[2, N] pos = [ra_measured, dec_measured]';
-  matrix[2, N] pm = [pmra, pmdec]';
+  matrix[2, N] pos = [ra_measured, dec_measured];
+  matrix[2, N] pm = [pmra, pmdec];
   matrix[4, N] pos_pm = [ra_measured, dec_measured, pmra, pmdec]; // mas/yr for the pm part
   
   matrix[3, N] vels_sph;
@@ -588,14 +588,14 @@ model {
     // observation process ----------------------
     for (i in 1 : N) {
       if (pos_obs[i] && pm_obs[i]) {
-        pos_pm_measured[i] ~ multi_normal_cholesky(pos_pm[i],
+        pos_pm_measured[i] ~ multi_normal_cholesky(pos_pm[1:4, i],
                                                    pos_pm_cov_mats[i]);
       } else {
         if (pos_obs[i]) {
-          pos_measured[i] ~ multi_normal_cholesky(pos[i], pos_cov_mats[i]);
+          pos_measured[i] ~ multi_normal_cholesky(pos[1:2,i], pos_cov_mats[i]);
         }
         if (pm_obs[i]) {
-          pm_measured[i] ~ multi_normal_cholesky(pm[i], pm_cov_mats[i]);
+          pm_measured[i] ~ multi_normal_cholesky(pm[1:2,i], pm_cov_mats[i]);
         }
       }
       if (dist_obs[i]) {

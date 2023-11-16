@@ -389,8 +389,6 @@ data {
   vector[N] ra_pmdec_corr;
   vector[N] dec_pmra_corr;
   
-  /* int<lower=1> grainsize; */
-  
   real alpha_mean;
   real alpha_sigma;
   real beta_mean;
@@ -530,10 +528,13 @@ parameters {
   row_vector<lower=0, upper=max(dist_measured + 5 * dist_err)>[N] dist; // kpc
   
   // velocity parameters for each tracer
+  
   row_vector<lower=min(pmra_measured - 5 * pmra_err),
              upper=max(pmra_measured + 5 * pmra_err)>[N] pmra; // mas/yr
+  
   row_vector<lower=min(pmdec_measured - 5 * pmdec_err),
              upper=max(pmdec_measured + 5 * pmdec_err)>[N] pmdec; // mas/yr
+  
   row_vector<lower=min(vlos_measured - 5 * vlos_err),
              upper=max(vlos_measured + 5 * vlos_err)>[N] vlos; // km/s
 }
@@ -609,17 +610,8 @@ model {
   // likelihood ---------------------
   
   profile("df") {
-    // single core non-vectorized
-    /* target += partial_df_lupdf(dummy | 1, N, y, p_phi0, p_gamma, p_alpha, p_beta); */
-    
-    // multicore non-vectorized
-    /* target += reduce_sum(partial_df_lupdf, dummy, grainsize, y, p_phi0, p_gamma, p_alpha, p_beta); */
-    
     // single core vectorized. this is fastest.
     y ~ df_vec(p_phi0, p_gamma, p_alpha, p_beta);
-    
-    // multicore vectorize
-    /* target += reduce_sum(partial_df_vec_lupdf, dummy, grainsize, y, p_phi0, p_gamma, p_alpha, p_beta); */
   }
 }
 generated quantities {

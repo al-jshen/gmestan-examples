@@ -83,7 +83,8 @@ functions {
     // R is icrs -> gctc matrix
     // H is icrs -> gctc matrix
     // offset is icrs -> gctc offset vector (galcen_dist, 0, 0)
-    vector transform_pos(real ra, real dec, real dist, matrix R, matrix H, vector offset) {
+    // renaming offset to offsett because offset is now a reserved keyword in stan
+    vector transform_pos(real ra, real dec, real dist, matrix R, matrix H, vector offsett) {
 
         real x_icrs = dist * cos(ra) * cos(dec);
         real y_icrs = dist * sin(ra) * cos(dec);
@@ -91,7 +92,7 @@ functions {
         vector[3] r_icrs = to_vector([x_icrs, y_icrs, z_icrs]);
 
         vector[3] r_gal = R * r_icrs;
-        r_gal -= offset;
+        r_gal -= offsett;
         r_gal = H * r_gal;
 
         /* print("position transformation"); */
@@ -244,7 +245,7 @@ functions {
     // dist in kpc
     // pmra, pmdec in mas/yr
     // vlos in km/s
-    vector transform_vels(real ra, real dec, real dist, real pmra, real pmdec, real vlos, matrix R, matrix H, vector offset, vector solarmotion) {
+    vector transform_vels(real ra, real dec, real dist, real pmra, real pmdec, real vlos, matrix R, matrix H, vector offsett, vector solarmotion) {
         real km_per_kpc = 3.085677581491367e+16;
         real mas_to_unitless = 4.84813681109536e-09;
         real s_per_yr = 31557600.0;
@@ -252,7 +253,7 @@ functions {
         real vra = dist * pmra * km_per_kpc * mas_to_unitless / s_per_yr; // in km/s
         real vdec = dist * pmdec * km_per_kpc * mas_to_unitless / s_per_yr; // in km/s
 
-        vector[3] r_gal = transform_pos(ra, dec, dist, R, H, offset);
+        vector[3] r_gal = transform_pos(ra, dec, dist, R, H, offsett);
         vector[3] v_icrs = s2c_vel(dist, dec, ra, vlos, vdec, vra);
 
         matrix[3, 3] A = H * R;
@@ -266,7 +267,7 @@ functions {
     }
 
     // r_gal is [3, N] matrix with rows xgc, ygc, zgc
-    matrix transform_vels_vec(row_vector ra, row_vector dec, row_vector dist, row_vector pmra, row_vector pmdec, row_vector vlos, matrix R, matrix H, vector offset, vector solarmotion) {
+    matrix transform_vels_vec(row_vector ra, row_vector dec, row_vector dist, row_vector pmra, row_vector pmdec, row_vector vlos, matrix R, matrix H, vector offsett, vector solarmotion) {
 
         int N = size(ra);
 

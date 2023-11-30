@@ -1,6 +1,6 @@
 # gmestan
 
-This repository provides examples for using Stan to create a hierarchical Bayesian model to estimate the mass of the Milky Way using kinematic data from tracers. See the associated paper describing the model and code here: [Shen et al. 2021](https://arxiv.org/abs/2111.09327)
+This repository provides examples for using Stan to create a hierarchical Bayesian model to estimate the mass of the Milky Way using kinematic data from tracers. See the associated paper describing the model and code here: [Shen et al. 2022](https://arxiv.org/abs/2111.09327)
 
 ## GME model
 
@@ -42,15 +42,21 @@ install.packages(c("tidyverse", "latex2exp", "bayesplot", "shinystan", "ggridges
 
 ## Citation
 
-If you make use of the code in this repository and find it useful, please consider citing [Shen et al. 2021](https://arxiv.org/abs/2111.09327). The BibTeX entry for this paper is: 
+If you make use of the code in this repository and find it useful, please consider citing [Shen et al. 2022](https://arxiv.org/abs/2111.09327). The BibTeX entry for this paper is: 
 ```bibtex
-@article{Shen_2021,
-  title={The Mass of the Milky Way from the H3 Survey},
-  author={Shen, Jeff and Eadie, Gwendolyn M. and Murray, Norman and Zaritsky, Dennis and Speagle, Joshua S. and Ting, Yuan-Sen and Conroy, Charlie and Cargile, Phillip A. and Johnson, Benjamin D. and Naidu, Rohan P. and Han, Jiwon Jesse},
-  year={2021},
-  eprint={2111.09327v1},
-  archivePrefix={arXiv},
-  primaryClass={astro-ph.GA}
+@article{Shen_2022,
+   title={The Mass of the Milky Way from the H3 Survey},
+   volume={925},
+   ISSN={1538-4357},
+   url={http://dx.doi.org/10.3847/1538-4357/ac3a7a},
+   DOI={10.3847/1538-4357/ac3a7a},
+   number={1},
+   journal={The Astrophysical Journal},
+   publisher={American Astronomical Society},
+   author={Shen, Jeff and Eadie, Gwendolyn M. and Murray, Norman and Zaritsky, Dennis and Speagle, Joshua S. and Ting, Yuan-Sen and Conroy, Charlie and Cargile, Phillip A. and Johnson, Benjamin D. and Naidu, Rohan P. and Han, Jiwon Jesse},
+   year={2022},
+   month={jan},
+   pages={1}
 }
 ```
 
